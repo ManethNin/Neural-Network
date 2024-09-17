@@ -22,7 +22,6 @@ def ReLU(x):
     return np.maximum(0, x)
 
 def ReLU_derivative(x):
-
     return np.where(x > 0, 1, 0)
 
 def softmax(x):
@@ -67,7 +66,7 @@ y_train = [3]
 y_train = pd.DataFrame(y_train)
 
 
-def forward_propagation(X,params):
+def forward_propagation(X,params): 
     w1, b1, w2, b2, w3, b3 = params
     #Layer 1
     z1 = np.dot(X,w1) + b1    #(1,100)
