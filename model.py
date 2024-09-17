@@ -25,7 +25,6 @@ def ReLU_derivative(x):
 
     return np.where(x > 0, 1, 0)
 
-
 def softmax(x):
     x = np.array(x, dtype=float)
     max_x = np.amax(x, 1).reshape(x.shape[0],1) 
