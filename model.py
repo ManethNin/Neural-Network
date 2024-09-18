@@ -1,11 +1,15 @@
 print("hello")
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 wo = pd.read_csv("C:/Users/REDTECH/Desktop/DNN Assignment/Assignment_1/Task_1/a/w.csv", header=None)
 b0 = pd.read_csv("C:/Users/REDTECH/Desktop/DNN Assignment/Assignment_1/Task_1/a/b.csv", header=None)
-# X_train = pd.read_csv(r"C:\Users\REDTECH\Desktop\DNN Assignment\Assignment_1\Task_2\x_train.csv", header=None)
-# y_train = pd.read_csv(r"C:\Users\REDTECH\Desktop\DNN Assignment\Assignment_1\Task_2\y_train.csv", header=None)
+
+X_train = pd.read_csv(r"C:\Users\REDTECH\Desktop\DNN Assignment\Assignment_1\Task_2\x_train.csv", header=None)
+y_train = pd.read_csv(r"C:\Users\REDTECH\Desktop\DNN Assignment\Assignment_1\Task_2\y_train.csv", header=None)
+X_test = pd.read_csv(r"C:\Users\REDTECH\Desktop\DNN Assignment\Assignment_1\Task_2\x_test.csv", header=None)
+y_test = pd.read_csv(r"C:\Users\REDTECH\Desktop\DNN Assignment\Assignment_1\Task_2\y_test.csv", header=None)
 
 weights_btw_layer0_to_layer1 = wo.iloc[:14, 1:].values  #(14, 100)
 bias_for_layer1 = b0.iloc[:1, 1:].values  #(100,)
@@ -59,11 +63,11 @@ def update_params(params, grads, learning_rate):
     return W1, b1, W2, b2, W3, b3
 
 # For testing
-X=[-1, 1, 1, 1, -1, -1, 1, -1, 1, 1, -1, -1, 1, 1]
-X = pd.DataFrame(X)
-X_train = X.T
-y_train = [3]
-y_train = pd.DataFrame(y_train)
+# X=[-1, 1, 1, 1, -1, -1, 1, -1, 1, 1, -1, -1, 1, 1]
+# X = pd.DataFrame(X)
+# X_train = X.T
+# y_train = [3]
+# y_train = pd.DataFrame(y_train)
 
 
 def forward_propagation(X,params): 
@@ -108,27 +112,94 @@ def back_propagation(X, y_true, params, activations):
     
     return dW1, db1, dW2, db2, dW3, db3
 
-def train(X, y, params, epochs, learning_rate):
-    y_one_hot = one_hot_encode(y)  # one-hot encoding
+def calculate_accuracy(y_pred, y_true):
+    # Ensure y_true is converted to a NumPy array (if it's a pandas DataFrame/Series)
+    if isinstance(y_true, pd.DataFrame) or isinstance(y_true, pd.Series):
+        y_true = y_true.values
 
-    for epoch in range(epochs):  
-        activations = forward_propagation(X,params)  
-        grads = back_propagation(X, y_one_hot, params, activations)  
-        params = update_params(params, grads, learning_rate)  
+    # Convert predicted probabilities to class labels (indices of max probabilities)
+    y_pred_labels = np.argmax(y_pred, axis=1)
+
+    # Ensure y_true is flattened, in case it's 2D (e.g., shape (n, 1))
+    y_true = y_true.flatten()
+
+    return np.mean(y_pred_labels == y_true)
+
+# Training function with plotting functionality
+def train(X_train, y_train, X_test, y_test, params, learning_rate, epochs):
+    y_train_one_hot = one_hot_encode(y_train)
+    y_test_one_hot = one_hot_encode(y_test)
+
+    train_costs, test_costs = [], []
+    train_accuracies, test_accuracies = [], []
+
+    for epoch in range(epochs):
+        # Forward propagation
+        activations = forward_propagation(X_train, params)
+        z1, h1, z2, h2, z3, h3_train = activations
         
-        # Calculate and print the loss (how bad the guesses were)
-        _, _, _, _, _, h3 = activations
-        loss = cross_entropy_loss(h3, y_one_hot)
-   
-        print(f"Epoch {epoch}, Loss: {loss}")
+        # Backpropagation and parameter update
+        grads = back_propagation(X_train, y_train_one_hot, params, activations)
+        params = update_params(params, grads, learning_rate)
+        
+        # Forward propagation for the test set
+        _, _, _, _, _, h3_test = forward_propagation(X_test, params)
+
+        # Calculate training and testing cost
+        train_loss = cross_entropy_loss(h3_train, y_train)
+        test_loss = cross_entropy_loss(h3_test, y_test)
+
+        # Calculate accuracy
+        train_accuracy = calculate_accuracy(h3_train, y_train)
+        test_accuracy = calculate_accuracy(h3_test, y_test)
+        
+        # Store costs and accuracies
+        train_costs.append(train_loss)
+        test_costs.append(test_loss)
+        train_accuracies.append(train_accuracy)
+        test_accuracies.append(test_accuracy)
+
+        # Print loss and accuracy every 100 epochs
+        if epoch % 100 == 0:
+            print(f"Epoch {epoch}, Train Loss: {train_loss}, Test Loss: {test_loss}, Train Acc: {train_accuracy}, Test Acc: {test_accuracy}")
     
-    return grads 
+    return train_costs, test_costs, train_accuracies, test_accuracies
 
-trained_params = train(X_train, y_train, initial_params, epochs=1, learning_rate=0.1)
+# trained_params = train(X_train, y_train, initial_params, epochs=1, learning_rate=0.1)
 
-print("dw1", trained_params[0].shape)
-print("db1", trained_params[1].shape)
-print("dw2", trained_params[2].shape)
-print("db2", trained_params[3].shape)
-print("dw3", trained_params[4].shape)
-print("db3", trained_params[5].shape)
+def plot_graphs(train_costs, test_costs, train_accuracies, test_accuracies, learning_rate):
+    epochs = range(len(train_costs))
+    
+    plt.figure(figsize=(12, 8))
+    
+    # Plot costs
+    plt.subplot(2, 1, 1)
+    plt.plot(epochs, train_costs, label='Train Cost')
+    plt.plot(epochs, test_costs, label='Test Cost')
+    plt.title(f"Cost vs Iterations (Learning Rate = {learning_rate})")
+    plt.xlabel('Iterations')
+    plt.ylabel('Cost')
+    plt.legend()
+    
+    # Plot accuracies
+    plt.subplot(2, 1, 2)
+    plt.plot(epochs, train_accuracies, label='Train Accuracy')
+    plt.plot(epochs, test_accuracies, label='Test Accuracy')
+    plt.title(f"Accuracy vs Iterations (Learning Rate = {learning_rate})")
+    plt.xlabel('Iterations')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    
+    plt.tight_layout()
+    plt.show()
+
+for lr in [0.01, 0.1, 1]:
+    train_costs, test_costs, train_accuracies, test_accuracies = train(X_train, y_train, X_test, y_test, initial_params, lr, 100)
+    plot_graphs(train_costs, test_costs, train_accuracies, test_accuracies, lr)
+
+# print("dw1", trained_params[0].shape)
+# print("db1", trained_params[1].shape)
+# print("dw2", trained_params[2].shape)
+# print("db2", trained_params[3].shape)
+# print("dw3", trained_params[4].shape)
+# print("db3", trained_params[5].shape)
