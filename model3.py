@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import csv
 
 w0 = pd.read_csv("C:/Users/REDTECH/Desktop/DNN Assignment/Assignment_1/Task_1/a/w.csv", header=None)
 b0 = pd.read_csv("C:/Users/REDTECH/Desktop/DNN Assignment/Assignment_1/Task_1/a/b.csv", header=None)
