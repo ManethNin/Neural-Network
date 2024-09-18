@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 
 wo = pd.read_csv("C:/Users/REDTECH/Desktop/DNN Assignment/Assignment_1/Task_1/a/w.csv", header=None)
 b0 = pd.read_csv("C:/Users/REDTECH/Desktop/DNN Assignment/Assignment_1/Task_1/a/b.csv", header=None)
+w1 = pd.read_csv(r"C:\Users\REDTECH\Desktop\DNN Assignment\Assignment_1\Task_1\b\w-100-40-4.csv", header=None)
+b1 = pd.read_csv(r"C:\Users\REDTECH\Desktop\DNN Assignment\Assignment_1\Task_1\b\b-100-40-4.csv", header=None)
 
 X_train = pd.read_csv(r"C:\Users\REDTECH\Desktop\DNN Assignment\Assignment_1\Task_2\x_train.csv", header=None)
 y_train = pd.read_csv(r"C:\Users\REDTECH\Desktop\DNN Assignment\Assignment_1\Task_2\y_train.csv", header=None)
